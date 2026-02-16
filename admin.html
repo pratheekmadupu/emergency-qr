@@ -91,7 +91,6 @@ transition:.4s;
 <img src="logo.png" class="logo">
 <h2>Create Emergency QR</h2>
 
-<!-- FORM JUST FOR STRUCTURE (no reload) -->
 <form id="form">
 
 <input id="uid" placeholder="User ID">
@@ -115,12 +114,12 @@ transition:.4s;
 
 <script>
 
-/* PREVENT PAGE RELOAD */
+/* PREVENT FORM REFRESH */
 document.getElementById("form").addEventListener("submit",e=>e.preventDefault());
 
 /* 🔴 FIREBASE CONFIG */
 const firebaseConfig = {
-   apiKey: "AIzaSyBFXvSwZSrMbYHQkrge6UyZOv2uxU0VkPA",
+  apiKey: "AIzaSyBFXvSwZSrMbYHQkrge6UyZOv2uxU0VkPA",
   authDomain: "emergency-qr-b0adf.firebaseapp.com",
   databaseURL: "https://emergency-qr-b0adf-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "emergency-qr-b0adf",
@@ -156,8 +155,13 @@ health:healthVal
 })
 .then(()=>{
 
-currentLink = location.origin + "/?id=" + id;
+/* AUTO DETECT PROJECT PATH */
+const basePath = location.pathname.replace("admin.html","").replace(/\/$/,'');
 
+/* CORRECT LINK */
+currentLink = location.origin + basePath + "/?id=" + id;
+
+/* SHOW LINK */
 document.getElementById("qrLink").innerText=currentLink;
 
 /* GENERATE QR */
@@ -180,7 +184,7 @@ document.getElementById("form").reset();
 .catch(e=>alert("Firebase Error: "+e));
 }
 
-/* COPY */
+/* COPY LINK */
 function copyLink(){
 if(!currentLink) return;
 navigator.clipboard.writeText(currentLink);
