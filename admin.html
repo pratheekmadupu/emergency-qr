@@ -91,28 +91,36 @@ transition:.4s;
 <img src="logo.png" class="logo">
 <h2>Create Emergency QR</h2>
 
+<!-- FORM JUST FOR STRUCTURE (no reload) -->
+<form id="form">
+
 <input id="uid" placeholder="User ID">
 <input id="username" placeholder="Name">
 <input id="blood" placeholder="Blood Group">
 <input id="family" placeholder="Family Phone with country code">
 <input id="health" placeholder="Health Issue">
 
-<button class="save" onclick="saveUser()">Save & Generate QR</button>
+<button type="button" class="save" onclick="saveUser()">Save & Generate QR</button>
+
+</form>
 
 <div id="qrLink" class="link"></div>
 <div id="qrcode"></div>
 
-<button class="copy" onclick="copyLink()">Copy Link</button>
-<button class="download" onclick="downloadQR()">Download QR</button>
+<button type="button" class="copy" onclick="copyLink()">Copy Link</button>
+<button type="button" class="download" onclick="downloadQR()">Download QR</button>
 </div>
 
 <div id="popup" class="popup">✔ Successfully Saved</div>
 
 <script>
 
-/* 🔴 YOUR FIREBASE CONFIG */
+/* PREVENT PAGE RELOAD */
+document.getElementById("form").addEventListener("submit",e=>e.preventDefault());
+
+/* 🔴 FIREBASE CONFIG */
 const firebaseConfig = {
-  apiKey: "AIzaSyBFXvSwZSrMbYHQkrge6UyZOv2uxU0VkPA",
+   apiKey: "AIzaSyBFXvSwZSrMbYHQkrge6UyZOv2uxU0VkPA",
   authDomain: "emergency-qr-b0adf.firebaseapp.com",
   databaseURL: "https://emergency-qr-b0adf-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "emergency-qr-b0adf",
@@ -126,6 +134,7 @@ const db = firebase.database();
 
 let currentLink="";
 
+/* SAVE USER */
 function saveUser(){
 
 const id = document.getElementById("uid").value.trim();
@@ -134,8 +143,8 @@ const bloodVal = document.getElementById("blood").value.trim();
 const familyVal = document.getElementById("family").value.trim();
 const healthVal = document.getElementById("health").value.trim();
 
-if(id === "" || nameVal === ""){
-alert("Enter UserID and Name");
+if(id==="" || nameVal===""){
+alert("Enter User ID & Name");
 return;
 }
 
@@ -151,6 +160,7 @@ currentLink = location.origin + "/?id=" + id;
 
 document.getElementById("qrLink").innerText=currentLink;
 
+/* GENERATE QR */
 document.getElementById("qrcode").innerHTML="";
 new QRCode(document.getElementById("qrcode"),{
 text:currentLink,
@@ -158,20 +168,26 @@ width:180,
 height:180
 });
 
+/* POPUP */
 const popup=document.getElementById("popup");
 popup.classList.add("show");
 setTimeout(()=>popup.classList.remove("show"),2000);
+
+/* CLEAR FORM */
+document.getElementById("form").reset();
 
 })
 .catch(e=>alert("Firebase Error: "+e));
 }
 
+/* COPY */
 function copyLink(){
 if(!currentLink) return;
 navigator.clipboard.writeText(currentLink);
 alert("Link copied");
 }
 
+/* DOWNLOAD QR */
 function downloadQR(){
 const img=document.querySelector("#qrcode img");
 if(!img){alert("Generate QR first");return;}
