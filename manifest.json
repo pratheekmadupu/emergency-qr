@@ -1,0 +1,16 @@
+{
+  "name": "Emergency Medical ID",
+  "short_name": "Emergency ID",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0f1f",
+  "theme_color": "#ff3b3b",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

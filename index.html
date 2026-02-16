@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ResQR Emergency</title>
+
+<style>
+body{
+margin:0;
+font-family:system-ui;
+background:#0b1220;
+display:flex;
+align-items:center;
+justify-content:center;
+height:100vh;
+color:white;
+}
+
+.card{
+width:340px;
+background:#121a2f;
+border-radius:30px;
+padding:28px;
+text-align:center;
+box-shadow:0 20px 60px rgba(0,0,0,.6);
+}
+
+.logo{width:190px;margin-bottom:18px;}
+
+.name{font-size:28px;font-weight:700;margin-bottom:12px;}
+
+.blood{
+display:inline-block;
+background:#ff3b3b;
+padding:10px 20px;
+border-radius:30px;
+font-size:22px;
+font-weight:700;
+margin-bottom:20px;
+}
+
+.health{
+background:#1c2542;
+padding:14px;
+border-radius:18px;
+margin-bottom:22px;
+}
+
+.btn{
+width:100%;
+padding:16px;
+border:none;
+border-radius:20px;
+font-size:18px;
+font-weight:700;
+cursor:pointer;
+margin-top:10px;
+}
+
+.call{background:#22c55e;color:#002b10;}
+.loc{background:#3b82f6;color:white;}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+<img src="logo.png" class="logo">
+
+<div id="name" class="name">Loading...</div>
+<div id="blood" class="blood">--</div>
+
+<div class="health">
+<b>Health Issue:</b><br>
+<span id="health">Loading...</span>
+</div>
+
+<button id="callBtn" class="btn call">📞 Call Family</button>
+<button id="locBtn" class="btn loc">📍 Send Location</button>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+/* 🔴 PASTE YOUR FIREBASE CONFIG */
+const firebaseConfig = {
+  apiKey: "AIzaSyBFXvSwZSrMbYHQkrge6UyZOv2uxU0VkPA",
+  authDomain: "emergency-qr-b0adf.firebaseapp.com",
+  databaseURL: "https://emergency-qr-b0adf-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "emergency-qr-b0adf",
+  storageBucket: "emergency-qr-b0adf.firebasestorage.app",
+  messagingSenderId: "326186798135",
+  appId: "1:326186798135:web:21b57be22dff85849303b2",
+  measurementId: "G-SPGK1149TH"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+/* GET USER ID */
+const id = new URLSearchParams(window.location.search).get("id");
+
+if(!id){
+document.getElementById("name").innerText="No ID Provided";
+throw "No ID";
+}
+
+const snapshot = await get(ref(db,"users/"+id));
+
+if(!snapshot.exists()){
+document.getElementById("name").innerText="Invalid QR Code";
+}else{
+
+const d = snapshot.val();
+
+document.getElementById("name").innerText = d.name;
+document.getElementById("blood").innerText = d.blood;
+document.getElementById("health").innerText = d.health;
+
+/* CALL BUTTON */
+document.getElementById("callBtn").onclick=()=>{
+location.href="tel:"+d.family;
+};
+
+/* LOCATION BUTTON */
+document.getElementById("locBtn").onclick=()=>{
+navigator.geolocation.getCurrentPosition(pos=>{
+const lat=pos.coords.latitude;
+const lon=pos.coords.longitude;
+const map=`https://maps.google.com/?q=${lat},${lon}`;
+window.open(`https://wa.me/${d.family}?text=🚨 EMERGENCY LOCATION: ${map}`,"_blank");
+});
+};
+
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>ResQR Admin</title>
+
+<!-- QR LIBRARY -->
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+/* 🔴 FIREBASE CONFIG */
+const firebaseConfig = {
+  apiKey: "AIzaSyBFXvSwZSrMbYHQkrge6UyZOv2uxU0VkPA",
+  authDomain: "emergency-qr-b0adf.firebaseapp.com",
+  databaseURL: "https://emergency-qr-b0adf-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "emergency-qr-b0adf",
+  storageBucket: "emergency-qr-b0adf.firebasestorage.app",
+  messagingSenderId: "326186798135",
+  appId: "1:326186798135:web:21b57be22dff85849303b2"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+window.saveUser = () => {
+
+const id = document.getElementById("uid").value.trim();
+
+if(!id){
+alert("Enter User ID");
+return;
+}
+
+set(ref(db,'users/'+id),{
+name:name.value,
+blood:blood.value,
+family:family.value,
+health:health.value
+}).then(()=>{
+
+const link = location.origin + "/?id=" + id;
+
+/* SHOW LINK */
+document.getElementById("qrLink").innerText = link;
+
+/* GENERATE QR */
+document.getElementById("qrcode").innerHTML="";
+new QRCode(document.getElementById("qrcode"),{
+text: link,
+width: 180,
+height: 180
+});
+
+/* POPUP */
+const popup = document.getElementById("popup");
+popup.classList.add("show");
+setTimeout(()=>popup.classList.remove("show"),2000);
+
+});
+};
+</script>
+
+<style>
+body{
+margin:0;
+background:#0b1220;
+color:white;
+font-family:system-ui;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.panel{
+width:360px;
+background:#121a2f;
+padding:26px;
+border-radius:24px;
+text-align:center;
+box-shadow:0 20px 60px rgba(0,0,0,.6);
+}
+
+.logo{width:200px;margin-bottom:10px;}
+
+input{
+width:100%;
+padding:12px;
+margin:8px 0;
+border:none;
+border-radius:12px;
+background:#1c2542;
+color:white;
+}
+
+button{
+width:100%;
+padding:14px;
+margin-top:10px;
+border:none;
+border-radius:14px;
+background:#22c55e;
+font-weight:700;
+cursor:pointer;
+}
+
+.link{
+margin-top:10px;
+font-size:12px;
+opacity:.8;
+word-break:break-all;
+}
+
+#qrcode{
+margin-top:14px;
+background:white;
+padding:10px;
+display:inline-block;
+border-radius:12px;
+}
+
+/* POPUP */
+.popup{
+position:fixed;
+top:20px;
+left:50%;
+transform:translateX(-50%);
+background:#22c55e;
+color:#002b10;
+padding:14px 24px;
+border-radius:14px;
+font-weight:700;
+opacity:0;
+transition:.4s;
+}
+
+.popup.show{
+opacity:1;
+top:40px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="panel">
+<img src="logo.png" class="logo">
+<h2>Create Emergency Card</h2>
+
+<input id="uid" placeholder="User ID">
+<input id="name" placeholder="Name">
+<input id="blood" placeholder="Blood Group">
+<input id="family" placeholder="Family Phone">
+<input id="health" placeholder="Health Issue">
+
+<button onclick="saveUser()">Save</button>
+
+<div id="qrLink" class="link"></div>
+<div id="qrcode"></div>
+</div>
+
+<div id="popup" class="popup">✔ Successfully Saved</div>
+
+</body>
+</html>
