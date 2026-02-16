@@ -21,43 +21,54 @@ height:100vh;
 color:white;
 }
 
+/* CARD */
 .card{
-width:340px;
+width:360px;
 background:#121a2f;
-border-radius:30px;
-padding:28px;
+border-radius:28px;
+padding:30px;
 text-align:center;
 box-shadow:0 20px 60px rgba(0,0,0,.6);
 }
 
-.logo{width:190px;margin-bottom:15px;}
-.name{font-size:28px;font-weight:700;margin-bottom:10px;}
-
-.blood{
-background:#ff3b3b;
-padding:10px 20px;
-border-radius:30px;
-font-size:22px;
-font-weight:700;
-display:inline-block;
-margin-bottom:18px;
+/* BIGGER LOGO */
+.logo{
+width:240px;
+margin-bottom:20px;
 }
 
-.health{
+/* INFO BLOCK */
+.info{
 background:#1c2542;
-padding:14px;
+padding:16px;
 border-radius:18px;
-margin-bottom:18px;
+margin-bottom:14px;
+font-size:18px;
+text-align:left;
+line-height:1.6;
 }
 
+/* LABELS */
+.label{
+color:#9ca3af;
+font-weight:600;
+}
+
+/* VALUE */
+.value{
+color:white;
+font-weight:700;
+}
+
+/* BUTTONS */
 button{
 width:100%;
 padding:15px;
 border:none;
-border-radius:20px;
+border-radius:18px;
 font-size:17px;
 font-weight:700;
-margin-top:10px;
+margin-top:12px;
 cursor:pointer;
 }
 
@@ -69,25 +80,34 @@ cursor:pointer;
 <body>
 
 <div class="card">
+
 <img src="logo.png" class="logo">
 
-<div id="name" class="name">Loading...</div>
-<div id="blood" class="blood">--</div>
+<div class="info">
+<span class="label">NAME :</span>
+<span id="name" class="value">Loading...</span>
+</div>
 
-<div class="health">
-<b>Health Issue:</b><br>
-<span id="health">Loading...</span>
+<div class="info">
+<span class="label">BLOOD GROUP :</span>
+<span id="blood" class="value">--</span>
+</div>
+
+<div class="info">
+<span class="label">HEALTH ISSUE :</span>
+<span id="health" class="value">Loading...</span>
 </div>
 
 <button id="callBtn" class="call">📞 Call Family</button>
 <button id="locBtn" class="loc">📍 Send Location</button>
+
 </div>
 
 <script>
 
 /* 🔴 FIREBASE CONFIG */
 const firebaseConfig = {
-   apiKey: "AIzaSyBFXvSwZSrMbYHQkrge6UyZOv2uxU0VkPA",
+ apiKey: "AIzaSyBFXvSwZSrMbYHQkrge6UyZOv2uxU0VkPA",
   authDomain: "emergency-qr-b0adf.firebaseapp.com",
   databaseURL: "https://emergency-qr-b0adf-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "emergency-qr-b0adf",
@@ -99,7 +119,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-/* GET ID FROM LINK */
+/* GET ID */
 const id = new URLSearchParams(window.location.search).get("id");
 
 if(!id){
@@ -121,16 +141,14 @@ document.getElementById("name").innerText=d.name;
 document.getElementById("blood").innerText=d.blood;
 document.getElementById("health").innerText=d.health;
 
-/* CALL BUTTON */
+/* CALL */
 document.getElementById("callBtn").onclick=()=>{
 location.href="tel:"+d.family;
 };
 
 /* WHATSAPP LOCATION */
 document.getElementById("locBtn").onclick=()=>{
-
 navigator.geolocation.getCurrentPosition(pos=>{
-
 const map=`https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
 
 const msg=`🚨 EMERGENCY ALERT 🚨
@@ -142,7 +160,6 @@ ${map}`;
 window.open(`https://wa.me/${d.family}?text=${encodeURIComponent(msg)}`,"_blank");
 
 },()=>alert("Location permission denied"));
-
 };
 
 });
@@ -151,4 +168,3 @@ window.open(`https://wa.me/${d.family}?text=${encodeURIComponent(msg)}`,"_blank"
 
 </body>
 </html>
-
