@@ -114,8 +114,11 @@ transition:.4s;
 
 <script>
 
-/* PREVENT FORM REFRESH */
+/* PREVENT PAGE RELOAD */
 document.getElementById("form").addEventListener("submit",e=>e.preventDefault());
+
+/* 🔴 CHANGE ONLY IF REPO NAME CHANGES */
+const PROJECT_NAME = "emergency-qr";
 
 /* 🔴 FIREBASE CONFIG */
 const firebaseConfig = {
@@ -155,11 +158,8 @@ health:healthVal
 })
 .then(()=>{
 
-/* AUTO DETECT PROJECT PATH */
-const basePath = location.pathname.replace("admin.html","").replace(/\/$/,'');
-
-/* CORRECT LINK */
-currentLink = location.origin + basePath + "/?id=" + id;
+/* CORRECT GITHUB LINK */
+currentLink = location.origin + "/" + PROJECT_NAME + "/?id=" + id;
 
 /* SHOW LINK */
 document.getElementById("qrLink").innerText=currentLink;
