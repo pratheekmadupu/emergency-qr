@@ -3,11 +3,11 @@
 <head>
 <title>ResQR Admin Panel</title>
 
-<!-- Firebase (stable version) -->
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
-<!-- QR Code generator -->
+<!-- QR generator -->
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
 <style>
@@ -31,12 +31,7 @@ box-shadow:0 25px 70px rgba(0,0,0,.7);
 text-align:center;
 }
 
-.logo{
-width:200px;
-margin-bottom:10px;
-}
-
-h2{margin-bottom:12px;}
+.logo{width:200px;margin-bottom:10px;}
 
 input{
 width:100%;
@@ -63,12 +58,7 @@ cursor:pointer;
 .copy{background:#3b82f6;color:white;}
 .download{background:#ff3b3b;color:white;}
 
-.link{
-margin-top:12px;
-font-size:12px;
-opacity:.8;
-word-break:break-all;
-}
+.link{margin-top:12px;font-size:12px;word-break:break-all;}
 
 #qrcode{
 margin-top:14px;
@@ -78,7 +68,6 @@ border-radius:12px;
 display:inline-block;
 }
 
-/* popup */
 .popup{
 position:fixed;
 top:20px;
@@ -102,10 +91,10 @@ transition:.4s;
 <img src="logo.png" class="logo">
 <h2>Create Emergency QR</h2>
 
-<input id="uid" placeholder="User ID (EX: PRATH001)">
-<input id="name" placeholder="Name">
+<input id="uid" placeholder="User ID">
+<input id="username" placeholder="Name">
 <input id="blood" placeholder="Blood Group">
-<input id="family" placeholder="Family Phone (with country code)">
+<input id="family" placeholder="Family Phone with country code">
 <input id="health" placeholder="Health Issue">
 
 <button class="save" onclick="saveUser()">Save & Generate QR</button>
@@ -115,16 +104,15 @@ transition:.4s;
 
 <button class="copy" onclick="copyLink()">Copy Link</button>
 <button class="download" onclick="downloadQR()">Download QR</button>
-
 </div>
 
 <div id="popup" class="popup">✔ Successfully Saved</div>
 
 <script>
 
-/* 🔴 PUT YOUR FIREBASE CONFIG HERE */
+/* 🔴 YOUR FIREBASE CONFIG */
 const firebaseConfig = {
-   apiKey: "AIzaSyBFXvSwZSrMbYHQkrge6UyZOv2uxU0VkPA",
+  apiKey: "AIzaSyBFXvSwZSrMbYHQkrge6UyZOv2uxU0VkPA",
   authDomain: "emergency-qr-b0adf.firebaseapp.com",
   databaseURL: "https://emergency-qr-b0adf-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "emergency-qr-b0adf",
@@ -138,17 +126,16 @@ const db = firebase.database();
 
 let currentLink="";
 
-/* SAVE DATA */
 function saveUser(){
 
-const id=uid.value.trim();
-const nameVal=name.value;
-const bloodVal=blood.value;
-const familyVal=family.value;
-const healthVal=health.value;
+const id = document.getElementById("uid").value.trim();
+const nameVal = document.getElementById("username").value.trim();
+const bloodVal = document.getElementById("blood").value.trim();
+const familyVal = document.getElementById("family").value.trim();
+const healthVal = document.getElementById("health").value.trim();
 
-if(!id || !nameVal){
-alert("Enter User ID & Name");
+if(id === "" || nameVal === ""){
+alert("Enter UserID and Name");
 return;
 }
 
@@ -162,33 +149,31 @@ health:healthVal
 
 currentLink = location.origin + "/?id=" + id;
 
-qrLink.innerText=currentLink;
+document.getElementById("qrLink").innerText=currentLink;
 
-/* QR */
-qrcode.innerHTML="";
-new QRCode(qrcode,{text:currentLink,width:180,height:180});
+document.getElementById("qrcode").innerHTML="";
+new QRCode(document.getElementById("qrcode"),{
+text:currentLink,
+width:180,
+height:180
+});
 
-/* popup */
+const popup=document.getElementById("popup");
 popup.classList.add("show");
 setTimeout(()=>popup.classList.remove("show"),2000);
-
-/* clear form */
-uid.value=name.value=blood.value=family.value=health.value="";
 
 })
 .catch(e=>alert("Firebase Error: "+e));
 }
 
-/* COPY LINK */
 function copyLink(){
 if(!currentLink) return;
 navigator.clipboard.writeText(currentLink);
 alert("Link copied");
 }
 
-/* DOWNLOAD QR */
 function downloadQR(){
-const img=qrcode.querySelector("img");
+const img=document.querySelector("#qrcode img");
 if(!img){alert("Generate QR first");return;}
 
 const a=document.createElement("a");
