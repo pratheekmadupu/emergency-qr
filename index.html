@@ -1,9 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ResQR Emergency</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
 <style>
 body{
@@ -11,8 +15,8 @@ margin:0;
 font-family:system-ui;
 background:#0b1220;
 display:flex;
-align-items:center;
 justify-content:center;
+align-items:center;
 height:100vh;
 color:white;
 }
@@ -26,36 +30,35 @@ text-align:center;
 box-shadow:0 20px 60px rgba(0,0,0,.6);
 }
 
-.logo{width:190px;margin-bottom:18px;}
-
-.name{font-size:28px;font-weight:700;margin-bottom:12px;}
+.logo{width:190px;margin-bottom:15px;}
+.name{font-size:28px;font-weight:700;margin-bottom:10px;}
 
 .blood{
-display:inline-block;
 background:#ff3b3b;
 padding:10px 20px;
 border-radius:30px;
 font-size:22px;
 font-weight:700;
-margin-bottom:20px;
+display:inline-block;
+margin-bottom:18px;
 }
 
 .health{
 background:#1c2542;
 padding:14px;
 border-radius:18px;
-margin-bottom:22px;
+margin-bottom:18px;
 }
 
-.btn{
+button{
 width:100%;
-padding:16px;
+padding:15px;
 border:none;
 border-radius:20px;
-font-size:18px;
+font-size:17px;
 font-weight:700;
-cursor:pointer;
 margin-top:10px;
+cursor:pointer;
 }
 
 .call{background:#22c55e;color:#002b10;}
@@ -76,101 +79,75 @@ margin-top:10px;
 <span id="health">Loading...</span>
 </div>
 
-<button id="callBtn" class="btn call">📞 Call Family</button>
-<button id="locBtn" class="btn loc">📍 Send Location</button>
-
+<button id="callBtn" class="call">📞 Call Family</button>
+<button id="locBtn" class="loc">📍 Send Location</button>
 </div>
 
-<script type="module">
+<script>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-/* 🔴 PASTE YOUR FIREBASE CONFIG */
+/* 🔴 FIREBASE CONFIG */
 const firebaseConfig = {
-  apiKey: "AIzaSyBFXvSwZSrMbYHQkrge6UyZOv2uxU0VkPA",
-  authDomain: "emergency-qr-b0adf.firebaseapp.com",
-  databaseURL: "https://emergency-qr-b0adf-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "emergency-qr-b0adf",
-  storageBucket: "emergency-qr-b0adf.firebasestorage.app",
-  messagingSenderId: "326186798135",
-  appId: "1:326186798135:web:21b57be22dff85849303b2",
-  measurementId: "G-SPGK1149TH"
+  apiKey: "PASTE",
+  authDomain: "PASTE",
+  databaseURL: "PASTE",
+  projectId: "PASTE",
+  storageBucket: "PASTE",
+  messagingSenderId: "PASTE",
+  appId: "PASTE"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-/* GET USER ID */
+/* GET ID FROM LINK */
 const id = new URLSearchParams(window.location.search).get("id");
 
 if(!id){
-document.getElementById("name").innerText="No ID Provided";
+document.getElementById("name").innerText="Invalid QR";
 throw "No ID";
 }
 
-const snapshot = await get(ref(db,"users/"+id));
+/* LOAD DATA */
+db.ref("users/"+id).once("value").then(snapshot=>{
 
 if(!snapshot.exists()){
-document.getElementById("name").innerText="Invalid QR Code";
-}else{
+document.getElementById("name").innerText="User Not Found";
+return;
+}
 
-const d = snapshot.val();
+const d=snapshot.val();
 
-document.getElementById("name").innerText = d.name;
-document.getElementById("blood").innerText = d.blood;
-document.getElementById("health").innerText = d.health;
+document.getElementById("name").innerText=d.name;
+document.getElementById("blood").innerText=d.blood;
+document.getElementById("health").innerText=d.health;
 
 /* CALL BUTTON */
 document.getElementById("callBtn").onclick=()=>{
 location.href="tel:"+d.family;
 };
 
-/* SEND LOCATION TO WHATSAPP */
-document.getElementById("locBtn").onclick = () => {
+/* WHATSAPP LOCATION */
+document.getElementById("locBtn").onclick=()=>{
 
-if(!d.family){
-alert("Family number not available");
-return;
-}
+navigator.geolocation.getCurrentPosition(pos=>{
 
-if(!navigator.geolocation){
-alert("Location not supported");
-return;
-}
+const map=`https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
 
-navigator.geolocation.getCurrentPosition(
-(position)=>{
-
-const lat = position.coords.latitude;
-const lon = position.coords.longitude;
-
-const mapLink = `https://maps.google.com/?q=${lat},${lon}`;
-
-const message =
-`🚨 EMERGENCY ALERT 🚨
+const msg=`🚨 EMERGENCY ALERT 🚨
 ${d.name} may need help.
 
 Live Location:
-${mapLink}`;
+${map}`;
 
-/* open WhatsApp */
-window.open(
-`https://wa.me/${d.family}?text=${encodeURIComponent(message)}`,
-"_blank"
-);
+window.open(`https://wa.me/${d.family}?text=${encodeURIComponent(msg)}`,"_blank");
 
-},
-()=>{
-alert("Location permission denied");
-}
-);
+},()=>alert("Location permission denied"));
 
 };
 
+});
 
 </script>
 
 </body>
 </html>
-
