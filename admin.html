@@ -1,98 +1,52 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>ResQR Admin</title>
+<title>ResQR Admin Panel</title>
 
-<!-- QR LIBRARY -->
+<!-- Firebase (stable version) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<!-- QR Code generator -->
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-/* 🔴 FIREBASE CONFIG */
-const firebaseConfig = {
-  apiKey: "AIzaSyBFXvSwZSrMbYHQkrge6UyZOv2uxU0VkPA",
-  authDomain: "emergency-qr-b0adf.firebaseapp.com",
-  databaseURL: "https://emergency-qr-b0adf-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "emergency-qr-b0adf",
-  storageBucket: "emergency-qr-b0adf.firebasestorage.app",
-  messagingSenderId: "326186798135",
-  appId: "1:326186798135:web:21b57be22dff85849303b2"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-window.saveUser = () => {
-
-const id = document.getElementById("uid").value.trim();
-
-if(!id){
-alert("Enter User ID");
-return;
-}
-
-set(ref(db,'users/'+id),{
-name:name.value,
-blood:blood.value,
-family:family.value,
-health:health.value
-}).then(()=>{
-
-const link = location.origin + "/?id=" + id;
-
-/* SHOW LINK */
-document.getElementById("qrLink").innerText = link;
-
-/* GENERATE QR */
-document.getElementById("qrcode").innerHTML="";
-new QRCode(document.getElementById("qrcode"),{
-text: link,
-width: 180,
-height: 180
-});
-
-/* POPUP */
-const popup = document.getElementById("popup");
-popup.classList.add("show");
-setTimeout(()=>popup.classList.remove("show"),2000);
-
-});
-};
-</script>
 
 <style>
 body{
 margin:0;
 background:#0b1220;
-color:white;
 font-family:system-ui;
 display:flex;
 justify-content:center;
 align-items:center;
 height:100vh;
+color:white;
 }
 
 .panel{
-width:360px;
+width:380px;
 background:#121a2f;
-padding:26px;
-border-radius:24px;
+padding:28px;
+border-radius:26px;
+box-shadow:0 25px 70px rgba(0,0,0,.7);
 text-align:center;
-box-shadow:0 20px 60px rgba(0,0,0,.6);
 }
 
-.logo{width:200px;margin-bottom:10px;}
+.logo{
+width:200px;
+margin-bottom:10px;
+}
+
+h2{margin-bottom:12px;}
 
 input{
 width:100%;
 padding:12px;
-margin:8px 0;
+margin:7px 0;
 border:none;
 border-radius:12px;
 background:#1c2542;
 color:white;
+font-size:15px;
 }
 
 button{
@@ -101,13 +55,16 @@ padding:14px;
 margin-top:10px;
 border:none;
 border-radius:14px;
-background:#22c55e;
 font-weight:700;
 cursor:pointer;
 }
 
+.save{background:#22c55e;color:#002b10;}
+.copy{background:#3b82f6;color:white;}
+.download{background:#ff3b3b;color:white;}
+
 .link{
-margin-top:10px;
+margin-top:12px;
 font-size:12px;
 opacity:.8;
 word-break:break-all;
@@ -116,12 +73,12 @@ word-break:break-all;
 #qrcode{
 margin-top:14px;
 background:white;
-padding:10px;
-display:inline-block;
+padding:12px;
 border-radius:12px;
+display:inline-block;
 }
 
-/* POPUP */
+/* popup */
 .popup{
 position:fixed;
 top:20px;
@@ -129,17 +86,13 @@ left:50%;
 transform:translateX(-50%);
 background:#22c55e;
 color:#002b10;
-padding:14px 24px;
+padding:14px 26px;
 border-radius:14px;
 font-weight:700;
 opacity:0;
 transition:.4s;
 }
-
-.popup.show{
-opacity:1;
-top:40px;
-}
+.popup.show{opacity:1;top:40px;}
 </style>
 </head>
 
@@ -147,21 +100,103 @@ top:40px;
 
 <div class="panel">
 <img src="logo.png" class="logo">
-<h2>Create Emergency Card</h2>
+<h2>Create Emergency QR</h2>
 
-<input id="uid" placeholder="User ID">
+<input id="uid" placeholder="User ID (EX: PRATH001)">
 <input id="name" placeholder="Name">
 <input id="blood" placeholder="Blood Group">
-<input id="family" placeholder="Family Phone">
+<input id="family" placeholder="Family Phone (with country code)">
 <input id="health" placeholder="Health Issue">
 
-<button onclick="saveUser()">Save</button>
+<button class="save" onclick="saveUser()">Save & Generate QR</button>
 
 <div id="qrLink" class="link"></div>
 <div id="qrcode"></div>
+
+<button class="copy" onclick="copyLink()">Copy Link</button>
+<button class="download" onclick="downloadQR()">Download QR</button>
+
 </div>
 
 <div id="popup" class="popup">✔ Successfully Saved</div>
+
+<script>
+
+/* 🔴 PUT YOUR FIREBASE CONFIG HERE */
+const firebaseConfig = {
+   apiKey: "AIzaSyBFXvSwZSrMbYHQkrge6UyZOv2uxU0VkPA",
+  authDomain: "emergency-qr-b0adf.firebaseapp.com",
+  databaseURL: "https://emergency-qr-b0adf-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "emergency-qr-b0adf",
+  storageBucket: "emergency-qr-b0adf.firebasestorage.app",
+  messagingSenderId: "326186798135",
+  appId: "1:326186798135:web:21b57be22dff85849303b2"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let currentLink="";
+
+/* SAVE DATA */
+function saveUser(){
+
+const id=uid.value.trim();
+const nameVal=name.value;
+const bloodVal=blood.value;
+const familyVal=family.value;
+const healthVal=health.value;
+
+if(!id || !nameVal){
+alert("Enter User ID & Name");
+return;
+}
+
+db.ref("users/"+id).set({
+name:nameVal,
+blood:bloodVal,
+family:familyVal,
+health:healthVal
+})
+.then(()=>{
+
+currentLink = location.origin + "/?id=" + id;
+
+qrLink.innerText=currentLink;
+
+/* QR */
+qrcode.innerHTML="";
+new QRCode(qrcode,{text:currentLink,width:180,height:180});
+
+/* popup */
+popup.classList.add("show");
+setTimeout(()=>popup.classList.remove("show"),2000);
+
+/* clear form */
+uid.value=name.value=blood.value=family.value=health.value="";
+
+})
+.catch(e=>alert("Firebase Error: "+e));
+}
+
+/* COPY LINK */
+function copyLink(){
+if(!currentLink) return;
+navigator.clipboard.writeText(currentLink);
+alert("Link copied");
+}
+
+/* DOWNLOAD QR */
+function downloadQR(){
+const img=qrcode.querySelector("img");
+if(!img){alert("Generate QR first");return;}
+
+const a=document.createElement("a");
+a.href=img.src;
+a.download="ResQR.png";
+a.click();
+}
+</script>
 
 </body>
 </html>
